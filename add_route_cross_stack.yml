@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# CrossStackReferenceを使って、他のStackから値を取得してルートを追加する
+# 今回は。vpc_subnetからルートテーブルを取得して使用する。
+
+Resources:
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyInternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      # CrossStackReferenceを使ってvpc_subnetからVPCを取得している
+      VpcId: !ImportValue CrossStackMyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  RouteForPrivateSubnet:
+    Type: AWS::EC2::Route
+    Properties:
+      # CrossStackReferenceを使ってvpc_subnetからルートテーブルを取得している
+      RouteTableId: !ImportValue CrossStackRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway

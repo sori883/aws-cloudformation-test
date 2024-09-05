@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# パラメータを使用してルートテーブルIDを取得して、ルートを追加する
+# ルートテーブルIDはrtb-0x0x0x0x0x0x0の形式
+
+Parameters:
+  RouteTableId:
+    Type: String
+    # rtb-英数字の形式だけ許可
+    AllowedPattern: "^rtb-[a-zA-Z0-9]+$"
+    ConstraintDescription: "有効なRouteTableIdを記載してください。"
+
+Resources:
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyInternetGateway
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !ImportValue CrossStackMyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  RouteForPrivateSubnet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTableId
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway

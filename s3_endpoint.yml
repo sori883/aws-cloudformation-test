@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+# S3 Gateway Endpointを作成する
+# S3 Gateway Endpointを利用するには、ルートテーブルにルートを追加する必要がある。
+# この例では、RouteTableIdsでルートテーブルにルートを追加している。
+
+Resources:
+  MyVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !ImportValue CrossStackMyVPC
+      ServiceName: com.amazonaws.ap-northeast-1.s3
+      RouteTableIds:
+        - !ImportValue CrossStackRouteTable
+      VpcEndpointType: Gateway
