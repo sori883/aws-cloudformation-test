@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  EC2Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName : "EC2Role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    "DependsOn" : "EC2Role"
+    Properties:
+      Path: "/"
+      Roles:
+        - "EC2Role"
+
+  EC2: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: ami-00d101850e971728d
+      InstanceType: t2.micro
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "false"
+          DeviceIndex: "0"
+          SubnetId: !ImportValue CrossStackPrivateSubnet
+          GroupSet:
+            - !ImportValue CrossStackEC2SG
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      Tags:
+          - Key: Name
+            Value: ec2-cf-linux
+
+  EC22: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: ami-0d9b323107733780e
+      InstanceType: t2.micro
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "false"
+          DeviceIndex: "0"
+          SubnetId: !ImportValue CrossStackPrivateSubnet
+          GroupSet:
+            - !ImportValue CrossStackEC2SG
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      Tags:
+          - Key: Name
+            Value: ec2-cf-windows
